@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>My First DApp</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="main.css">
+
+    <script src="./node_modules/web3/dist/web3.min.js"></script>
+
+</head>
+
+<body>
+    <div class="container">
+        <form>
+
+            <h1 class="form-title">My First Decentralized App</h1>
+            <div class="form-group">
+                <label for="employee">Employee on contract</label>
+                <h2 type="text" id="employee"></h2>
+            </div>
+            <div class="form-group">
+                <label for="name">Employee Name </label>
+                <input type="text" class="form-control" id="name">
+            </div>
+            <div class="form-group">
+                <label for="age">Employee Age </label>
+                <input type="number" class="form-control" id="age">
+            </div>
+        </form>
+        <button id="button" class="btn btn-primary">Update Contract</button>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+
+    <script>
+        if (typeof web3 !== 'undefined') {
+            web3 = new Web3(web3.currentProvider);
+        } else {
+            web3 = new Web3(new Web3.providers.HttpProvider("https://api.s0.b.hmny.io"));
+        }
+
+        web3.eth.defaultAccount = web3.eth.accounts[0];
+
+        var employeeContract = new web3.eth.Contract([
+	{
+		"inputs": [],
+		"name": "getEmployee",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_name",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_age",
+				"type": "uint256"
+			}
+		],
+		"name": "setEmployee",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+], '0x7bD8B649088E8d90b95f481821DB010461038030');
+
+        employeeContract.methods.getEmployee().call(function (error, result) {
+            if (!error) {
+                $("#employee").html(result[0] + ' (' + result[1] + ' years)');
+            } else
+                console.log(error);
+        });
+
+        $("#button").click(function () {
+            employeeContract.methods.setEmployee($("#name").val(), $("#age").val()).send({ from: '0x2Fa700d7B8267Cddf214C7B6597A9E81A9fBDAE1' }, function (error, transactionHash) {
+                if (!error) {
+                    employeeContract.methods.getEmployee().call(function (error, result) {
+                        if (!error) {
+                            $("#employee").html(result[0] + ' (' + result[1] + ' years)');
+                        } else
+                            console.log(error);
+                    });
+                } else {
+                    console.log(error);
+                }
+
+            });
+        });
+
+    </script>
+
+</body>
+
+</html>
